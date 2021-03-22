@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 usage="Usage: $0 [script_name]"
 
@@ -7,7 +7,7 @@ if [ $# -gt 1 -o "$1" = "help" -o "$1" = "-help" -o "$1" = "--help" ]; then
   exit 1;
 fi
 
-base_dir="${base_dir:-$HOME/liquidsoap-daemon}"
+base_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 # enforce that base_dir is a full path
 if [ ! $(printf %.1s "$base_dir") = "/" ]; then
