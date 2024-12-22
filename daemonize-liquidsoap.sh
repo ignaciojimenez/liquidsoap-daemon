@@ -35,7 +35,7 @@ cd ${LINK_DIR}
 
 script_name=$1
 if [ -z "${script_name}" ]; then
-	script_name=main
+  script_name=main
 fi
 
 script_dir=${base_dir}/script
@@ -51,6 +51,8 @@ else
   exit 1
 fi
 
+script_name=$(basename ${script_name})
+script_name=${script_name%.*}
 run_script="${script_dir}/${script_name}-run.liq"
 pid_dir="${base_dir}/pid"
 log_dir="${base_dir}/log"
@@ -106,12 +108,13 @@ EOS
 
 if [ "${init_type}" != "launchd" ]; then
     cat <<EOS >> "${run_script}"
-set("init.daemon",true)
-set("init.daemon.change_user",true)
-set("init.daemon.change_user.group","${USER}")
-set("init.daemon.change_user.user","${USER}")
-set("init.daemon.pidfile",true)
-set("init.daemon.pidfile.path","${pid_dir}/${script_name}-run.pid")
+settings.init.daemon.set(true)
+settings.init.daemon.change_user.set(true)
+settings.init.daemon.change_user.group.set("${USER}")
+settings.init.daemon.change_user.user.set("${USER}")
+settings.init.daemon.pidfile.set(true)
+settings.init.daemon.pidfile.path.set("${pid_dir}/${script_name}-run.pid")
+settings.init.daemon.pidfile.perms.set(0o640)
 EOS
 fi
 
@@ -131,6 +134,7 @@ cat "liquidsoap.${init_type}.in" | \
     sed -e "s#@pid_file@#${pid_dir}/${script_name}-run.pid#g" > "${script_name}-liquidsoap.${init_type}"
 
 cat "liquidsoap.logrotate.in" | \
+    sed -e "s#@user@#${USER}#g" | \
     sed -e "s#@base_dir@#${base_dir}#g" > "${script_name}-liquidsoap.logrotate"
 
 case "${init_type}" in
